@@ -1,21 +1,18 @@
-# Nome do compilador
 CC = gcc
 
-# Flags de compilação
-CFLAGS = -Wall -pthread
+CFLAGS = -Wall -Wextra -g -pthread
 
-# Nome do executável
+SRCS = rca.c
+
 TARGET = rca
 
-# Arquivo-fonte
-SRC = rca.c
-
-# Regra padrão
 all: $(TARGET)
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
+# Regra para construir o executável
+$(TARGET): $(SRCS)
+	$(CC) $(CFLAGS) $(SRCS) -o $(TARGET)
 
-# Limpa arquivos compilados
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) *.o log.txt
+
+.PHONY: all clean
