@@ -289,7 +289,7 @@ void* servidor_udp(void* arg) {
 
     // Associa (bind) o socket UDP ao endereço e porta.
     if (bind(socket_udp, (struct sockaddr*)&endereco_servidor_udp, sizeof(endereco_servidor_udp)) < 0) {
-        perror("[UDP] Erro crítico no bind UDP"); // Avisa.
+        perror("[UDP] Erro no bind UDP"); // Avisa.
         close(socket_udp); // Fecha.
         exit(EXIT_FAILURE); // Aborta.
     }
@@ -330,7 +330,7 @@ void* servidor_udp(void* arg) {
             // Envia a resposta de volta para quem perguntou (endereco_remetente_udp).
             sendto(socket_udp, &resposta_udp, sizeof(resposta_udp), 0,
                    (struct sockaddr*)&endereco_remetente_udp, tamanho_endereco_remetente);
-            printf("[UDP] Respondi a LISTA_USUARIOS de %s\n", ip_remetente);
+            printf("[UDP] Respondido LISTA_USUARIOS de %s\n", ip_remetente);
         }
         // Se a mensagem for um pedido para LISTAR ARQUIVOS (deste peer)...
         else if (msg_recebida_udp.tipo_msg == LISTA_ARQUIVOS) {
@@ -338,7 +338,7 @@ void* servidor_udp(void* arg) {
             int total_meus_arquivos; // Quantos arquivos eu tenho.
             listar_arquivos(lista_meus_arquivos, &total_meus_arquivos); // Pega a lista.
 
-            printf("[UDP] %s pediu minha lista de arquivos. Tenho %d arquivos.\n", ip_remetente, total_meus_arquivos);
+            printf("[UDP] %s pediu a lista de arquivos. Tenho %d arquivos.\n", ip_remetente, total_meus_arquivos);
             // Para cada arquivo que eu tenho...
             for (int i = 0; i < total_meus_arquivos; i++) {
                 mensagem_udp_t resposta_udp; // Prepara uma mensagem de resposta.
@@ -346,7 +346,6 @@ void* servidor_udp(void* arg) {
                 strncpy(resposta_udp.nome_arquivo, lista_meus_arquivos[i], TAM_NOME_ARQ -1); // Copia nome do arquivo.
                 resposta_udp.nome_arquivo[TAM_NOME_ARQ-1] = '\0';
                 resposta_udp.tamanho_arquivo = 0; // só o nome.
-                                                 // Poderia ser o tamanho real se o protocolo exigisse.
                 // Envia uma mensagem para cada arquivo.
                 sendto(socket_udp, &resposta_udp, sizeof(resposta_udp), 0,
                        (struct sockaddr*)&endereco_remetente_udp, tamanho_endereco_remetente);
@@ -354,12 +353,12 @@ void* servidor_udp(void* arg) {
         }
         // Se a mensagem for uma PROCURA POR ARQUIVO...
         else if (msg_recebida_udp.tipo_msg == PROCURA_ARQUIVO) {
-            printf("[UDP] %s está procurando por '%s'. Deixa eu ver se tenho...\n", ip_remetente, msg_recebida_udp.nome_arquivo);
+            printf("[UDP] %s está procurando por '%s'. Verificando...\n", ip_remetente, msg_recebida_udp.nome_arquivo);
             struct stat info_arquivo_procurado; // Estrutura para informações do arquivo.
             // stat verifica se o arquivo existe e pega informações sobre ele.
             if (stat(msg_recebida_udp.nome_arquivo, &info_arquivo_procurado) == 0 && S_ISREG(info_arquivo_procurado.st_mode)) {
                 // Se o arquivo existe E é um arquivo regular...
-                printf("[UDP] Achei '%s'! Tamanho: %ld bytes. Vou avisar %s.\n",
+                printf("[UDP] Encontrado '%s'! Tamanho: %ld bytes. Avisando %s.\n",
                        msg_recebida_udp.nome_arquivo, (long)info_arquivo_procurado.st_size, ip_remetente);
                 mensagem_udp_t resposta_udp; // Prepara a resposta.
                 resposta_udp.tipo_msg = RESPOSTA_ARQUIVO; // Tipo: RESPOSTA_ARQUIVO.
@@ -371,11 +370,10 @@ void* servidor_udp(void* arg) {
                        (struct sockaddr*)&endereco_remetente_udp, tamanho_endereco_remetente);
             } else {
                 // Se não encontrou ou não é um arquivo regular.
-                printf("[UDP] Não encontrei '%s' ou não é um arquivo válido para compartilhar.\n", msg_recebida_udp.nome_arquivo);
-                // O protocolo não exige uma resposta negativa, então não enviamos nada.
+                printf("[UDP] Não encontrado o '%s' ou não é um arquivo válido para compartilhar.\n", msg_recebida_udp.nome_arquivo);
+                // O protocolo não exige uma resposta negativa.
             }
         }
-        // Outros tipos de mensagem UDP podem ser tratados aqui se necessário.
     }
 
     close(socket_udp);
