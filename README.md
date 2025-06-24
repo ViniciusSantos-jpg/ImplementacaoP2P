@@ -1,93 +1,49 @@
-# Rede de Compartilhamento de Arquivos - RCA
-
-Este projeto é uma implementação de uma rede de compartilhamento de arquivos ponto-a-ponto (P2P) em C, desenvolvida para a disciplina de Redes de Computadores. Cada instância do programa funciona simultaneamente como cliente e servidor, permitindo a descoberta de peers, busca e transferência de arquivos em uma rede local.
+# Implementação de Rede P2P em C
 
 
----
+##  Visão Geral
 
-## Funcionalidades
+Este projeto consiste na implementação de uma rede P2P (ponto-a-ponto) em linguagem C, desenvolvida para a disciplina de Redes de Computadores. O sistema permite que cada nó na rede atue tanto como cliente quanto como servidor, possibilitando a descoberta de outros pares, a busca e a transferência de arquivos de forma descentralizada.
 
-O sistema permite que um usuário realize as seguintes ações:
+##  Funcionalidades
 
-- **Descoberta de Peers:** Listar todos os usuários (peers) ativos na rede local através de uma solicitação em broadcast.
-- **Listagem de Arquivos:** Solicitar e visualizar uma lista consolidada de todos os arquivos compartilhados por todos os peers ativos na rede.
-- **Busca de Arquivos:** Procurar por um arquivo específico pelo nome em toda a rede. Os peers que possuem o arquivo respondem com o nome e o tamanho do arquivo.
-- **Download de Arquivos:** Baixar um arquivo diretamente de outro peer após localizá-lo. A transferência é feita de forma confiável utilizando o protocolo TCP.
-- **Logging:** Todas as solicitações recebidas pelo servidor e as transferências de arquivos concluídas são registradas em um arquivo `log.txt`, incluindo IP do solicitante, tipo de solicitação, data/hora e tempo da transferência.
+* **Descoberta de Pares:** Nós descobrem outros pares ativos na rede local através de requisições em broadcast.
+* **Lista de Arquivos:** Visualização de uma lista consolidada de arquivos compartilhados por todos os pares ativos na rede.
+* **Busca de Arquivos:** Busca por arquivos específicos pelo nome. Os pares que possuem o arquivo respondem com seus detalhes.
+* **Download de Arquivos:** Suporte ao download de arquivos diretamente de outros pares utilizando TCP para uma transferência de dados confiável.
+* **Logs de Operações:** Todas as requisições e transferências são registradas em `log.txt`, incluindo IP do requisitante, tipo de requisição, data, hora e duração da transferência.
 
----
+##  Como usar
 
-## Tecnologias e Arquitetura
+O projeto utiliza um `Makefile` para facilitar a compilação e execução.
 
-- **Linguagem:** C
-- **Protocolos de Rede:**
-  - **UDP:** Utilizado para todas as mensagens de controle, como descoberta de peers e busca de arquivos, aproveitando sua capacidade de broadcast.
-  - **TCP:** Utilizado para a transferência confiável de arquivos entre os peers.
-- **Concorrência:**
-  - O programa utiliza **Pthreads (POSIX Threads)** para gerenciar a concorrência.
-  - Uma thread principal gerencia a interface do cliente, enquanto threads separadas em background cuidam das funcionalidades de servidor UDP e servidor TCP.
-  - Para cada transferência de arquivo via TCP, uma nova thread dedicada é criada, permitindo que múltiplos downloads ocorram simultaneamente sem bloquear o servidor.
+1.  **Clone o repositório:**
+    ```bash
+    git clone [https://github.com/ViniciusSantos-jpg/ImplementacaoP2P.git](https://github.com/ViniciusSantos-jpg/ImplementacaoP2P.git)
+    cd ImplementacaoP2P
+    ```
 
----
+2.  **Compile o projeto:**
+    Este comando utiliza o `gcc` para compilar o `main.c` e gerar o executável `p2p`.
+    ```bash
+    make
+    ```
 
-## Requisitos do Ambiente
+3.  **Execute o programa:**
+    Este comando inicia o nó P2P.
+    ```bash
+    make executar
+    ```
+    *Alternativamente, você pode executar diretamente com `./p2p` após a compilação.*
 
-Para compilar e executar este projeto, você precisará de um ambiente com as seguintes características:
-
-- **Sistema Operacional:** Linux (o programa foi projetado e testado para este ambiente, conforme especificado).
-- **Compilador:** `gcc`.
-- **Ferramentas de Build:** `make`.
-- **Bibliotecas:** Um ambiente de desenvolvimento C padrão para Linux, que geralmente inclui as bibliotecas necessárias. Em sistemas baseados em Debian/Ubuntu, a instalação do pacote `build-essential` deve ser suficiente para prover todas as dependências (como `pthreads`).
-
-```bash
-# Em sistemas Debian/Ubuntu, para instalar as ferramentas necessárias:
-sudo apt update
-sudo apt install build-essential
-```
-
----
-
-## Compilação e Execução
-
-### 1. Clone o Repositório (se aplicável):
-```bash
-git clone <url-do-seu-repositorio>
-cd <nome-do-repositorio>
-```
-
-### 2. Compile o Programa:
-O projeto inclui um Makefile que automatiza o processo de compilação. Para compilar, execute:
-```bash
-make
-```
-Isso criará um executável chamado `rca`.
-
-### 3. Execute o Programa:
-Para simular a rede P2P, você deve executar o programa em múltiplos terminais ou em diferentes Máquinas Virtuais (VMs) que estejam na mesma rede local (configuradas como "Adaptador em Ponte" ou "Rede Interna").
-
-Execute o programa em cada terminal/VM com o seguinte comando:
-```bash
-./rca
-```
-
-**Importante:** O programa compartilha os arquivos que estão no mesmo diretório de onde ele é executado. Portanto, coloque os arquivos que deseja compartilhar nesta pasta antes de executar.
-
-### 4. Limpando os Arquivos Gerados:
-Para remover o executável compilado (`rca`), os arquivos objeto (`.o`) e o arquivo de log (`log.txt`), utilize o comando:
-```bash
-make clean
-```
-
----
-
+4.  **Limpar arquivos gerados:**
+    Para remover o executável, o arquivo de log e os arquivos baixados, utilize o comando:
+    ```bash
+    make limpar
+    ```
 ## Estrutura do Projeto
 
-```
-.
-├── rca                 # Executável (gerado após a compilação)
-├── rca.c               # Código fonte principal da aplicação
-├── Makefile            # Arquivo de compilação
-└── README.md           # Este arquivo
-```
-
-**log.txt:** Será gerado no diretório durante a execução, contendo os logs das atividades do servidor.
+* `main.c`: Código principal da aplicação.
+* `files/`: Diretório que contém os arquivos a serem compartilhados.
+* `downloads/`: Diretório onde os arquivos baixados são salvos.
+* `log.txt`: Arquivo de log das operações.
